@@ -1,90 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>AR Business Card</title>
-
-    <!-- A-Frame & AR.js -->
-    <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
-
+    <meta charset="utf-8">
+    <title>AR Visiting Card</title>
+    <!-- Load A-Frame and AR.js -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
     <style>
-      body, html {
-        margin: 0;
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
-        background: black;
-      }
-      #message {
-        color: white;
-        text-align: center;
-        font-family: Arial, sans-serif;
-        margin-top: 30%;
+      body { margin: 0; overflow: hidden; }
+      #playbtn {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-weight: bold;
+        display: none;
       }
     </style>
   </head>
-
   <body>
-    <div id="message">📷 Allow camera access to view your AR card</div>
-
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true;"
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-      id="scene"
-    >
-      <!-- Marker -->
-      <a-marker type="pattern" url="ARCard.patt">
-        <a-video
-          src="#video1"
-          width="1"
-          height="0.6"
-          position="0 0 0"
-          rotation="-90 0 0"
-        ></a-video>
-      </a-marker>
-
-      <!-- Assets -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-assets>
-        <video
-          id="video1"
-          src="intro.mp4"
-          autoplay
-          loop
-          muted
-          playsinline
-          webkit-playsinline
-        ></video>
+        <video id="myVideo" src="intro.mp4" autoplay loop muted playsinline></video>
       </a-assets>
+
+      <a-marker type="pattern" url="pattern-marker.patt">
+        <a-video src="#myVideo" width="2" height="1" position="0 0.5 0" rotation="-90 0 0"></a-video>
+      </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-      // Remove loading message when AR.js is ready
-      document.querySelector("a-scene").addEventListener("loaded", () => {
-        document.getElementById("message").style.display = "none";
-      });
-
-      // ✅ Force mobile browsers to use the REAR camera
-      window.addEventListener("load", () => {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices
-            .getUserMedia({
-              video: { facingMode: { exact: "environment" } },
-            })
-            .then((stream) => {
-              // Stop immediately (we only need permission to be granted)
-              stream.getTracks().forEach((track) => track.stop());
-              console.log("Rear camera access confirmed ✅");
-            })
-            .catch((err) => {
-              console.warn("Rear camera not available, using default:", err);
-            });
-        }
-      });
-    </script>
   </body>
 </html>
