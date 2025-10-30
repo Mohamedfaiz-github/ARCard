@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>AR Business Card</title>
 
-    <!-- Load A-Frame & AR.js -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+    <!-- A-Frame & AR.js -->
+    <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
 
     <style>
       body, html {
@@ -16,28 +16,27 @@
         height: 100%;
         background: black;
       }
-      #loadingMessage {
+      #message {
         color: white;
         text-align: center;
-        margin-top: 20%;
         font-family: Arial, sans-serif;
+        margin-top: 30%;
       }
     </style>
   </head>
 
   <body>
-    <div id="loadingMessage">📷 Initializing camera... please wait</div>
+    <div id="message">📷 Allow camera access to view your AR card</div>
 
     <a-scene
-      vr-mode-ui="enabled: false"
       embedded
+      vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true;"
       arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
       id="scene"
     >
-      <!-- Marker Pattern -->
+      <!-- Marker -->
       <a-marker type="pattern" url="ARCard.patt">
-        <!-- Video Display -->
         <a-video
           src="#video1"
           width="1"
@@ -64,36 +63,28 @@
     </a-scene>
 
     <script>
-      // Hide loading message once AR.js starts
+      // Remove loading message when AR.js is ready
       document.querySelector("a-scene").addEventListener("loaded", () => {
-        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("message").style.display = "none";
       });
 
-      // Force use of back camera on mobile devices
-      window.onload = function () {
-        const sceneEl = document.querySelector("a-scene");
-
+      // ✅ Force mobile browsers to use the REAR camera
+      window.addEventListener("load", () => {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          const constraints = {
-            audio: false,
-            video: {
-              facingMode: { ideal: "environment" } // 👈 This forces back camera
-            }
-          };
-
-          navigator.mediaDevices.getUserMedia(constraints)
-            .then(function (stream) {
-              const video = document.querySelector("video");
-              video.srcObject = stream;
+          navigator.mediaDevices
+            .getUserMedia({
+              video: { facingMode: { exact: "environment" } },
             })
-            .catch(function (err) {
-              console.error("Camera error:", err);
-              alert("Unable to access camera. Please check permissions.");
+            .then((stream) => {
+              // Stop immediately (we only need permission to be granted)
+              stream.getTracks().forEach((track) => track.stop());
+              console.log("Rear camera access confirmed ✅");
+            })
+            .catch((err) => {
+              console.warn("Rear camera not available, using default:", err);
             });
-        } else {
-          alert("Camera not supported on this device/browser.");
         }
-      };
+      });
     </script>
   </body>
 </html>
